@@ -1,0 +1,39 @@
+[
+  {
+    "type": "switch",
+    "name": "commentable",
+    "label": "允许发表评论",
+    "defaultValue": true,
+    "suffix": "如果禁止，则无法发表评论和查看评论。",
+    "switch": {
+      "checkedChildren": "允许",
+      "unCheckedChildren": "禁止"
+    }
+  },
+  {
+    "type": "number",
+    "name": "pagesize",
+    "label": "每页评论数",
+    "defaultValue": 10,
+    "suffix": "文章详情页中评论每页的条数，回复不限制。",
+    "number": {
+      "max": 100,
+      "min": 1,
+      "step": 1,
+      "unit": "条"
+    }
+  },
+  {
+    "type": "number",
+    "name": "latestPagesize",
+    "label": "最新评论条数",
+    "defaultValue": 5,
+    "suffix": "最新评论显示的条数，一般用于侧边栏功能组。",
+    "number": {
+      "max": 100,
+      "min": 1,
+      "step": 1,
+      "unit": "条"
+    }
+  }
+]

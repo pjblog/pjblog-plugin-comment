@@ -1,0 +1,58 @@
+{
+  "name": "pjblog-plugin-comment",
+  "description": "PJBlog插件之评论系统；发表评论、删除评论、评论列表、热门评论、对文章HOOK，功能比较齐全。此插件为官方插件，创作者款可以自行开发评论系统。",
+  "version": "1.0.0",
+  "repository": "https://github.com/pjblog/pjblog-template-plugin",
+  "homepage": "https://npmjs.com/pjblog-template-plugin",
+  "cache": "file",
+  "port": 8866,
+  "cookie": [
+    "MCrRDOdOkFgUr8UPXw81FYP4TghKBFkG",
+    "yuhp9cUuZ8WjYdxLfpo5tyIzK6QrJmOS"
+  ],
+  "keywords": [
+    "pjblog",
+    "plugin"
+  ],
+  "main": "dist/widget/index.js",
+  "files": [
+    "dist",
+    "pjblog.configs.json"
+  ],
+  "scripts": {
+    "build": "npm run widget:build",
+    "widget:build": "rm -rf ./dist/widget && node scripts/widget.js",
+    "widget:watch": "rm -rf ./dist/widget && node scripts/widget.js -w",
+    "start": "PJBLOG_ENV=development pjblog start",
+    "publish": "rm -rf .publish && node scripts/publish.js"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@pjblog/control": "^1.1.0",
+    "@types/react": "^18.0.24",
+    "@types/react-dom": "^18.0.8",
+    "@vitejs/plugin-react": "^2.2.0",
+    "fs-extra": "^10.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "typescript": "^4.9.4",
+    "vite": "^3.2.3",
+    "@pjblog/bootstrap": "^1.1.0",
+    "@types/koa": "^2.13.5",
+    "pjblog-theme-default": "^1.1.0",
+    "mysql2": "^2.3.3"
+  },
+  "pjblog": {
+    "type": "plugin",
+    "icon": "https://app-cdn.zblogcn.com/files/phpplugin/iddahe_com_schedule/logo.png-logo",
+    "extends": {}
+  },
+  "orm": {
+    "type": "mysql",
+    "host": "127.0.0.1",
+    "port": 3306,
+    "database": "npm",
+    "username": "root",
+    "password": "fdnsyj211314"
+  }
+}
