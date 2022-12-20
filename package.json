@@ -1,7 +1,7 @@
 {
   "name": "pjblog-plugin-comment",
   "description": "PJBlog插件之评论系统；发表评论、删除评论、评论列表、热门评论、对文章HOOK，功能比较齐全。此插件为官方插件，创作者款可以自行开发评论系统。",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "repository": "https://github.com/pjblog/pjblog-template-plugin",
   "homepage": "https://npmjs.com/pjblog-template-plugin",
   "cache": "file",
@@ -44,7 +44,7 @@
   },
   "pjblog": {
     "type": "plugin",
-    "icon": "https://app-cdn.zblogcn.com/files/phpplugin/iddahe_com_schedule/logo.png-logo",
+    "icon": "https://app-cdn.zblogcn.com/files/phpplugin/iddahe_com_notify/logo.png-logo",
     "extends": {}
   },
   "orm": {
@@ -53,6 +53,6 @@
     "port": 3306,
     "database": "npm",
     "username": "root",
-    "password": "fdnsyj211314"
+    "password": ""
   }
 }
