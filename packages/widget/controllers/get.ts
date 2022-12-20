@@ -126,7 +126,7 @@ export class GetComments extends Component<Comment, IResponse> {
       })
       return {
         comments: options.comments,
-        reply_maps
+        map: reply_maps
       }
     }
   }
