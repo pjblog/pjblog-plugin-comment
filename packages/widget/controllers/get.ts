@@ -89,11 +89,8 @@ export class GetComments extends Component<Comment, IResponse> {
     return (context: IResponse, comments: TCommentState[]) => {
       const ids = comments.map(raw => raw.id);
       const runner = service.createNewRunner();
-      runner
-        .where('comm.comm_parent_id IN (:...ids)', { ids })
-        .orderBy({
-          'comm.gmt_create': 'ASC'
-        })
+      runner.where('comm.comm_parent_id IN (:...ids)', { ids });
+      runner.orderBy({ 'comm.gmt_create': 'ASC' });
       return {
         comments, runner,
       }
@@ -104,7 +101,7 @@ export class GetComments extends Component<Comment, IResponse> {
   public replies() {
     const service = new CommentDBO(this.manager);
     return async (context: IResponse, options: { comments: TCommentState[], runner: SelectQueryBuilder<BlogCommentEntity> }) => {
-      const raws = await options.runner.getRawMany<TCommentRawState>();
+      const raws = options.comments.length ? await options.runner.getRawMany<TCommentRawState>() : [];
       const res = service.formatRawComments(raws);
       return {
         comments: options.comments,
