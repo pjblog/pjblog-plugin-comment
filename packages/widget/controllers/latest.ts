@@ -58,6 +58,7 @@ export class GetLatestComments extends Component<Comment, IComment[]> {
           id: chunk.id,
           code: chunk.code,
           content: chunk.content,
+          time: chunk.ctime,
           user: {
             nickname: chunk.nickname,
             avatar: chunk.avatar,
