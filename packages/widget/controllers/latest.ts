@@ -1,13 +1,14 @@
-import { SelectQueryBuilder } from 'typeorm';
+import Comment from '..';
 import { Controller } from '../utils';
-import { Component, Water } from '@pjblog/http';
+import { Component, Water, Request } from '@pjblog/http';
 import { HttpBadRequestException } from '@typeservice/exception';
 import { CommentDBO } from '../dbo';
-import { BlogCommentEntity } from '../entity';
-import type Comment from '..';
+import { getNode } from '@pjblog/manager';
+import { TypeORM } from '@pjblog/typeorm';
 import type { TCommentRawState } from '../types';
+import type { EntityManager } from 'typeorm';
 
-interface IComment {
+export interface IComment {
   id: number,
   code: string,
   content: string,
@@ -18,53 +19,49 @@ interface IComment {
 }
 
 @Controller('GET', '/latest')
-export class GetLatestComments extends Component<Comment, IComment[]> {
-  get manager() {
-    return this.container.connection.manager;
+export class GetLatestCommentsController extends Component<IComment[]> {
+  public readonly manager: EntityManager;
+  public readonly service: CommentDBO;
+  public readonly comment: Comment;
+  constructor(req: Request) {
+    super(req, []);
+    this.manager = getNode(TypeORM).value.manager;
+    this.service = new CommentDBO(this.manager);
+    this.comment = getNode(Comment);
   }
 
-  public response(): IComment[] {
-    return [];
-  }
-
-  @Water()
+  @Water(1)
   public checkCommentable() {
-    return () => {
-      const commentbale = this.container.storage.get('commentable');
-      if (!commentbale) {
-        throw new HttpBadRequestException('评论功能已禁止');
-      }
+    const commentbale = this.comment.storage.get('commentable');
+    if (!commentbale) {
+      throw new HttpBadRequestException('评论功能已禁止');
     }
   }
 
-  @Water({ stage: 2 })
+  @Water(2)
   public runner() {
-    const service = new CommentDBO(this.manager);
-    return () => {
-      const runner = service.createNewRunner();
-      runner.addSelect('comm.comm_content', 'content')
-      runner.orderBy({ 'comm.gmt_create': 'DESC' });
-      return runner;
-    }
+    const runner = this.service.createNewRunner();
+    runner.addSelect('comm.comm_content', 'content')
+    runner.orderBy({ 'comm.gmt_create': 'DESC' });
+    return runner;
   }
 
-  @Water({ stage: 3 })
-  public list() {
-    return async (context: IComment[], runner: SelectQueryBuilder<BlogCommentEntity>) => {
-      runner.limit(this.container.storage.get('latestPagesize'));
-      const res = await runner.getRawMany<TCommentRawState & { content: string }>();
-      context.push(...res.map(chunk => {
-        return {
-          id: chunk.id,
-          code: chunk.code,
-          content: chunk.content,
-          time: chunk.ctime,
-          user: {
-            nickname: chunk.nickname,
-            avatar: chunk.avatar,
-          }
+  @Water(3)
+  public async list() {
+    const runner = this.getCache<GetLatestCommentsController, 'runner'>('runner');
+    runner.limit(this.comment.storage.get('latestPagesize'));
+    const res = await runner.getRawMany<TCommentRawState & { content: string }>();
+    this.res.push(...res.map(chunk => {
+      return {
+        id: chunk.id,
+        code: chunk.code,
+        content: chunk.content,
+        time: chunk.ctime,
+        user: {
+          nickname: chunk.nickname,
+          avatar: chunk.avatar,
         }
-      }))
-    }
+      }
+    }))
   }
 }

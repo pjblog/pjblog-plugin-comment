@@ -1,19 +1,18 @@
-import { SelectQueryBuilder } from 'typeorm';
-import { BlogArticleEntity, Articles, TArticleRaw } from '@pjblog/core';
+import { ArticlesController } from '@pjblog/core';
 import { getWaterFall } from '@pjblog/http';
-import { Context } from 'koa';
 import { BlogCommentEntity } from '../entity';
 
-interface IAritlcesRaw extends TArticleRaw {
-  comments: number,
-}
+// interface IAritlcesRaw extends TArticleRaw {
+//   comments: number,
+// }
 
 export function pushCommentTotal() {
-  const water = getWaterFall(Articles);
+  const water = getWaterFall(ArticlesController);
 
   water.add('addCommentsRunner', {
     before: 'getList',
-    async callback(ctx: Context, context: number, runner: SelectQueryBuilder<BlogArticleEntity>) {
+    async callback(controller) {
+      const runner = controller.getCache<ArticlesController, 'createRunner'>('createRunner');
       runner.leftJoin(BlogCommentEntity, 'comm', 'comm.comm_article_id=art.id');
       runner.addSelect('COUNT(comm.id)', 'comments');
       return runner;
@@ -22,18 +21,13 @@ export function pushCommentTotal() {
 
   water.add('addComments', {
     after: 'formatArticles',
-    async callback(ctx: Context, context: number, options: { 
-      dataSource: any[], 
-      source: IAritlcesRaw[] 
-    }) {
-      const dataSource = options.dataSource.map((data, index) => {
-        data.comments = options.source[index].comments;
-        return data;
+    async callback(controller) {
+      const source = controller.getCache<ArticlesController, 'getList'>('getList');
+      const dataSource = controller.getCache<ArticlesController, 'formatArticles'>('formatArticles');
+      dataSource.forEach((data, index) => {
+        // @ts-ignore
+        data.comments = source[index].comments;
       })
-      return {
-        dataSource,
-        source: options.source,
-      }
     }
   })
 

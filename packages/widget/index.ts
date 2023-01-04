@@ -5,10 +5,17 @@ import { Http } from '@pjblog/http';
 import { Plugin } from '@pjblog/core';
 import { Markdown } from '@pjblog/markdown';
 import { BlogCommentEntity } from './entity';
-import { AddComment, Preview, DelComment, GetComments, GetLatestComments } from './controllers';
+import { AddCommentController, PreviewController, DelCommentController, GetCommentsController, GetLatestCommentsController } from './controllers';
 import { delCommentsWhenDelArticle, pushCommentTotal } from './hooks';
 import { Article } from '@pjblog/core';
 import { IConfigs } from './utils';
+
+export * from './controllers';
+export * from './dbo';
+export * from './entity';
+export * from './hooks';
+export * from './types';
+export * from './utils';
 
 @Provider
 export default class Comment extends Plugin<IConfigs> {
@@ -61,18 +68,18 @@ export default class Comment extends Plugin<IConfigs> {
     await this.TypeORM.synchronize(BlogCommentEntity);
     const unBindDelCommentsWhenDelArticle = delCommentsWhenDelArticle(this);
     const unBindPushCommentTotal = pushCommentTotal();
-    this.http.addController(this, AddComment);
-    this.http.addController(this, Preview);
-    this.http.addController(this, DelComment);
-    this.http.addController(this, GetComments);
-    this.http.addController(this, GetLatestComments);
+    this.http.addController(AddCommentController);
+    this.http.addController(PreviewController);
+    this.http.addController(DelCommentController);
+    this.http.addController(GetCommentsController);
+    this.http.addController(GetLatestCommentsController);
     this.logger.info('pjblog-plugin-comment Initialized.');
     return async () => {
-      this.http.delController(GetLatestComments);
-      this.http.delController(GetComments);
-      this.http.delController(DelComment);
-      this.http.delController(Preview);
-      this.http.delController(AddComment);
+      this.http.delController(GetLatestCommentsController);
+      this.http.delController(GetCommentsController);
+      this.http.delController(DelCommentController);
+      this.http.delController(PreviewController);
+      this.http.delController(AddCommentController);
       unBindPushCommentTotal();
       unBindDelCommentsWhenDelArticle();
       this.logger.info('pjblog-plugin-comment Terminated.');

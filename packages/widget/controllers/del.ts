@@ -1,51 +1,45 @@
 import { Controller } from '../utils';
-import { Component, Water, Middleware, Param, State } from '@pjblog/http';
+import { Component, Water, Middleware, Request } from '@pjblog/http';
 import { AutoGetUserInfo, CheckUserLogined, numberic, BlogUserEntity } from '@pjblog/core';
 import { HttpNotFoundException, HttpNotAcceptableException } from '@typeservice/exception';
 import { CommentDBO } from '../dbo';
-import { BlogCommentEntity } from '../entity';
-import type Comment from '..';
-
-type IResponse = number;
+import { getNode } from '@pjblog/manager';
+import { TypeORM } from '@pjblog/typeorm';
+import type { EntityManager } from 'typeorm';
 
 @Controller('DELETE', '/:cid(\\d+)')
 @Middleware(AutoGetUserInfo)
 @Middleware(CheckUserLogined)
-export class DelComment extends Component<Comment, IResponse> {
-  get manager() {
-    return this.container.connection.manager;
+export class DelCommentController extends Component<number> {
+  public readonly manager: EntityManager;
+  public readonly service: CommentDBO;
+  constructor(req: Request) {
+    super(req, Date.now());
+    this.manager = getNode(TypeORM).value.manager;
+    this.service = new CommentDBO(this.manager);
   }
 
-  public response(): IResponse {
-    return Date.now();
+  @Water(1)
+  public async checkComment() {
+    const cid = numberic(0)(this.req.params.cid);
+    if (!cid) throw new HttpNotFoundException('找不到评论');
+    const comment = await this.service.getOne(cid);
+    if (!comment) throw new HttpNotFoundException('找不到评论');
+    return comment;
   }
 
-  @Water({ stage: 1 })
-  public checkComment(@Param('cid', numberic(0)) cid: number) {
-    const service = new CommentDBO(this.manager);
-    return async (context: IResponse) => {
-      if (!cid) throw new HttpNotFoundException('找不到评论');
-      const comment = await service.getOne(cid);
-      if (!comment) throw new HttpNotFoundException('找不到评论');
-      return comment;
+  @Water(2)
+  public checkDeletable() {
+    const comment = this.getCache<DelCommentController, 'checkComment'>('checkComment');
+    const profile: BlogUserEntity = this.req.state.profile;
+    if (profile.level > 1 && profile.id !== comment.comm_user_id) {
+      throw new HttpNotAcceptableException('您没有权限删除此评论');
     }
   }
 
-  @Water({ stage: 2 })
-  public checkDeletable(@State('profile') profile: BlogUserEntity) {
-    return async (context: IResponse, comment: BlogCommentEntity) => {
-      if (profile.level > 1 && profile.id !== comment.comm_user_id) {
-        throw new HttpNotAcceptableException('您没有权限删除此评论');
-      }
-      return comment;
-    }
-  }
-
-  @Water({ stage: 3 })
+  @Water(3)
   public del() {
-    const service = new CommentDBO(this.manager);
-    return async (context: IResponse, comment: BlogCommentEntity) => {
-      await service.delete(comment);
-    }
+    const comment = this.getCache<DelCommentController, 'checkComment'>('checkComment');
+    return this.service.delete(comment);
   }
 }
