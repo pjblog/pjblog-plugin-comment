@@ -1,7 +1,7 @@
 import Comment from '..';
 import { Controller } from '../utils';
 import { Component, Water, Request } from '@pjblog/http';
-import { numberic } from '@pjblog/core';
+import { numberic, ArticleDBO } from '@pjblog/core';
 import { HttpNotFoundException, HttpBadRequestException } from '@typeservice/exception';
 import { CommentDBO } from '../dbo';
 import { getNode } from '@pjblog/manager';
@@ -20,6 +20,7 @@ export class GetCommentsController extends Component<IGetCommentsControllerRespo
   public readonly manager: EntityManager;
   public readonly service: CommentDBO;
   public readonly comment: Comment;
+  public readonly article: ArticleDBO;
   constructor(req: Request) {
     super(req, {
       dataSource: [],
@@ -29,6 +30,7 @@ export class GetCommentsController extends Component<IGetCommentsControllerRespo
     this.manager = getNode(TypeORM).value.manager;
     this.comment = getNode(Comment);
     this.service = new CommentDBO(this.manager);
+    this.article = new ArticleDBO(this.manager);
   }
 
   @Water(1)
@@ -48,7 +50,7 @@ export class GetCommentsController extends Component<IGetCommentsControllerRespo
   public async checkArticle() {
     const aid = numberic(0)(this.req.params.aid);
     if (!aid) throw new HttpNotFoundException('找不到文章');
-    const article = await this.service.getOne(aid);
+    const article = await this.article.getOne(aid);
     if (!article ) throw new HttpNotFoundException('找不到文章');
     return article;
   }
