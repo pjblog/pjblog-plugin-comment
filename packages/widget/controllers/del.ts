@@ -30,7 +30,7 @@ export class DelCommentController extends Component<number> {
 
   @Water(2)
   public checkDeletable() {
-    const comment = this.getCache<DelCommentController, 'checkComment'>('checkComment');
+    const comment = this.getCache('checkComment');
     const profile: BlogUserEntity = this.req.state.profile;
     if (profile.level > 1 && profile.id !== comment.comm_user_id) {
       throw new HttpNotAcceptableException('您没有权限删除此评论');
@@ -39,7 +39,7 @@ export class DelCommentController extends Component<number> {
 
   @Water(3)
   public del() {
-    const comment = this.getCache<DelCommentController, 'checkComment'>('checkComment');
+    const comment = this.getCache('checkComment');
     return this.service.delete(comment);
   }
 }

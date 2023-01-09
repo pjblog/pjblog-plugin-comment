@@ -48,7 +48,7 @@ export class GetLatestCommentsController extends Component<IComment[]> {
 
   @Water(3)
   public async list() {
-    const runner = this.getCache<GetLatestCommentsController, 'runner'>('runner');
+    const runner = this.getCache('runner');
     runner.limit(this.comment.storage.get('latestPagesize'));
     const res = await runner.getRawMany<TCommentRawState & { content: string }>();
     this.res.push(...res.map(chunk => {

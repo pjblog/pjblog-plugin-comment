@@ -66,7 +66,7 @@ export class GetCommentsController extends Component<IGetCommentsControllerRespo
 
   @Water(5)
   public async total() {
-    const runner = this.getCache<GetCommentsController, 'runner'>('runner');
+    const runner = this.getCache('runner');
     const count = await runner.clone().getCount();
     this.res.total = count;
     return runner;
@@ -76,7 +76,7 @@ export class GetCommentsController extends Component<IGetCommentsControllerRespo
   public async list() {
     const page = numberic(1)(this.req.query.page);
     const size = this.comment.storage.get('pagesize');
-    const runner = this.getCache<GetCommentsController, 'runner'>('runner');
+    const runner = this.getCache('runner');
     const raws = await runner
       .orderBy({ 'comm.gmt_create': 'DESC' })
       .offset((page - 1) * size)
@@ -87,7 +87,7 @@ export class GetCommentsController extends Component<IGetCommentsControllerRespo
 
   @Water(7)
   public replyRunner() {
-    const comments = this.getCache<GetCommentsController, 'list'>('list');
+    const comments = this.getCache('list');
     const ids = comments.map(raw => raw.id);
     const runner = this.service.createNewRunner();
     runner.where('comm.comm_parent_id IN (:...ids)', { ids });
@@ -97,8 +97,8 @@ export class GetCommentsController extends Component<IGetCommentsControllerRespo
 
   @Water(8)
   public async replies() {
-    const comments = this.getCache<GetCommentsController, 'list'>('list');
-    const runner = this.getCache<GetCommentsController, 'replyRunner'>('replyRunner');
+    const comments = this.getCache('list');
+    const runner = this.getCache('replyRunner');
     const raws = comments.length ? await runner.getRawMany<TCommentRawState>() : [];
     const res = this.service.formatRawComments(raws);
     return res;
@@ -106,7 +106,7 @@ export class GetCommentsController extends Component<IGetCommentsControllerRespo
 
   @Water(9)
   public match() {
-    const replies = this.getCache<GetCommentsController, 'replies'>('replies');
+    const replies = this.getCache('replies');
     const reply_maps = new Map<number, TCommentState[]>();
     replies.forEach(reply => {
       if (!reply_maps.has(reply.rid)) {
@@ -120,8 +120,8 @@ export class GetCommentsController extends Component<IGetCommentsControllerRespo
 
   @Water(10)
   public format() {
-    const comments = this.getCache<GetCommentsController, 'list'>('list');
-    const map = this.getCache<GetCommentsController, 'match'>('match');
+    const comments = this.getCache('list');
+    const map = this.getCache('match');
     this.res.dataSource.push(...comments.map(chunk => {
       chunk.replies = map.has(chunk.id) 
         ? map.get(chunk.id) 

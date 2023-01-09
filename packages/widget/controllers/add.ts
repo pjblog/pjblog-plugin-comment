@@ -78,8 +78,8 @@ export class AddCommentController extends Component<TCommentState, IBody> {
     const data = this.req.body;
     const user: BlogUserEntity = this.req.state.profile;
     const comment = new BlogCommentEntity();
-    const html = this.getCache<AddCommentController, 'compileMarkdown'>('compileMarkdown');
-    const article = this.getCache<AddCommentController, 'checkArticle'>('checkArticle');
+    const html = this.getCache('compileMarkdown');
+    const article = this.getCache('checkArticle');
     comment.comm_content = data.content;
     comment.comm_html = html;
     comment.comm_ip = ip;
@@ -92,7 +92,7 @@ export class AddCommentController extends Component<TCommentState, IBody> {
 
   @Water(6)
   public runner() {
-    const comment = this.getCache<AddCommentController, 'add'>('add');
+    const comment = this.getCache('add');
     const runner = this.service.createNewRunner();
     runner.where('comm.id=:cid', { cid: comment.id });
     return runner;
@@ -100,8 +100,8 @@ export class AddCommentController extends Component<TCommentState, IBody> {
 
   @Water(7)
   public async raws() {
-    const runner = this.getCache<AddCommentController, 'runner'>('runner');
-    const comment = this.getCache<AddCommentController, 'add'>('add');
+    const runner = this.getCache('runner');
+    const comment = this.getCache('add');
     const data = await runner.getRawMany<TCommentRawState>();
     const res = this.service.formatRawComments(data || []);
     const chunk = res[0];
